@@ -35,7 +35,7 @@ pipeline:
                     shell: Sh
                     command: |
                       cd android
-                      npm test
+                      npx wdio examples/run-parallel-test/parallel.conf.js --mochaOpts.grep "always passing"
                     envVariables:
                       BROWSERSTACK_USERNAME: <+secrets.getValue("browserstack_username")>
                       BROWSERSTACK_ACCESS_KEY: <+secrets.getValue("browserstack_access_key")>
