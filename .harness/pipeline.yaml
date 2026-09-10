@@ -1,0 +1,74 @@
+pipeline:
+  name: BrowserStack Android Tests
+  identifier: browserstack_android_tests
+  projectIdentifier: default
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Run Android Tests
+        identifier: run_android_tests
+        type: CI
+        spec:
+          cloneCodebase: true
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Install Dependencies
+                  identifier: install_dependencies
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: node:18
+                    shell: Sh
+                    command: |
+                      cd android
+                      npm install
+
+              - step:
+                  type: Run
+                  name: Run BrowserStack Parallel Tests
+                  identifier: run_browserstack_tests
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: node:18
+                    shell: Sh
+                    command: |
+                      cd android
+                      npm test
+                    envVariables:
+                      BROWSERSTACK_USERNAME: <+secrets.getValue("browserstack_username")>
+                      BROWSERSTACK_ACCESS_KEY: <+secrets.getValue("browserstack_access_key")>
+                      BUILD_NUMBER: <+pipeline.sequenceId>
+
+              - step:
+                  type: Run
+                  name: Run BrowserStack Local Tests
+                  identifier: run_browserstack_local_tests
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: node:18
+                    shell: Sh
+                    command: |
+                      cd android
+                      npm run local
+                    envVariables:
+                      BROWSERSTACK_USERNAME: <+secrets.getValue("browserstack_username")>
+                      BROWSERSTACK_ACCESS_KEY: <+secrets.getValue("browserstack_access_key")>
+                      BUILD_NUMBER: <+pipeline.sequenceId>
+
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account.harnessKubernetes
+              namespace: harness-builds
+
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.github
+        repoName: harness-test-wdio
+        build:
+          type: branch
+          spec:
+            branch: main
