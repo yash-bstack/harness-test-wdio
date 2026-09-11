@@ -1,65 +1,92 @@
-# webdriverio-appium-app-browserstack
-This repository demonstrates how to run Appium tests using [WebdriverIO](http://webdriver.io/) on BrowserStack App Automate.
+# Integrate App Automate with Harness
 
-<div align="center">
-<img src = "https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" > <br>
-<img src = "https://webdriver.io/img/webdriverio.png"  height="140px">
-</div>
+This repository demonstrates how to run Appium tests using [WebdriverIO](http://webdriver.io/) on BrowserStack App Automate, locally and through a Harness CI/CD pipeline.
 
-Code samples to get started with Appium tests for your Native App using WebdriverIO.
+---
 
-## Setup
+## Prerequisites
 
-### Requirements
+* **Node.js 8.11.2+**: Download it from the [official Node.js website](https://nodejs.org/en/) if not already installed.
+* **BrowserStack Account**: Active [BrowserStack App Automate](https://www.google.com/search?q=https://www.browserstack.com/app-automate) credentials (Username and Access Key).
+* **Harness Account**: An active Harness account with pipeline configuration privileges.
 
-* Node.js 8.11.2+
-  - If you don't have Node installed, download it from [here](https://nodejs.org/en/)
+---
 
-### Install the dependencies
+## 1. Local Run Setup
 
-For Android tests, run the following command in project's base directory :
+### Dependency Installation
 
-```sh
+Navigate to the platform directory you wish to test and install the required packages:
+
+* **Android:**
+```bash
 cd android
-npm i
+npm install
+
 ```
 
-Or,
 
-For dependencies for iOS tests, run following command in project's base directory :
-
-```sh
+* **iOS:**
+```bash
 cd ios
-npm i
+npm install
+
 ```
 
-## Getting Started
 
-Getting Started with Appium tests using WebdriverIO on BrowserStack couldn't be easier!
 
-### Run first test:
-  - Test script is available in `run-first-test` directory under [Android examples](./android) or [iOS examples](./ios)
-  - Follow the steps outlined in the documentation - [Get Started with your first test on App Automate](https://www.browserstack.com/docs/app-automate/appium/getting-started/nodejs/webdriverio)
+### Getting Started & Running Tests Locally
 
-### Speed up test execution with parallel testing :
+* **First Test:**
+* Test script location: `run-first-test` directory under [`./android`](https://www.google.com/search?q=./android) or [`./ios`](https://www.google.com/search?q=./ios).
+* Follow the [BrowserStack First Test Guide](https://www.browserstack.com/docs/app-automate/appium/getting-started/nodejs/webdriverio).
 
-- Test script is available in  `run-parallel-test` directory under [Android examples](./android) or [iOS examples](./ios)
-- Follow the steps outlined in the documentation - [Get Started with parallel testing on App Automate](https://www.browserstack.com/docs/app-automate/appium/getting-started/nodejs/webdriverio/parallelize-tests)
 
-### Use Local testing for apps that access resources hosted in development or testing environments :
+* **Parallel Testing:**
+* Test script location: `run-parallel-test` directory under [`./android`](https://www.google.com/search?q=./android) or [`./ios`](https://www.google.com/search?q=./ios).
+* Run command: `npm run test`
+* Follow the [BrowserStack Parallel Testing Guide](https://www.browserstack.com/docs/app-automate/appium/getting-started/nodejs/webdriverio/parallelize-tests).
+* Use the [Parallel Test Calculator](https://www.browserstack.com/automate/parallel-calculator?ref=github) to estimate required sessions.
 
-- Test script is available in `run-local-test` directory under [Android examples](./android) or [iOS examples](./ios)
-- Follow the steps outlined in the documentation - [Get Started with Local testing on App Automate](https://www.browserstack.com/docs/app-automate/appium/getting-started/nodejs/webdriverio/local-testing)
 
-**Note**: For other test frameworks supported by App-Automate refer our [Developer documentation](https://www.browserstack.com/docs/)
+* **Local Testing (Private/Internal Environments):**
+* Test script location: `run-local-test` directory under [`./android`](https://www.google.com/search?q=./android) or [`./ios`](https://www.google.com/search?q=./ios).
+* Run command: `npm run local`
+* Follow the [BrowserStack Local Testing Guide](https://www.browserstack.com/docs/app-automate/appium/getting-started/nodejs/webdriverio/local-testing).
 
-## Running your tests
-- To run parallel tests, run `npm run test`
-- To run local test, run `npm run local`
 
- Understand how many parallel sessions you need by using our [Parallel Test Calculator](https://www.browserstack.com/automate/parallel-calculator?ref=github)
 
-## Getting Help
+---
 
-If you are running into any issues or have any queries, please check [Browserstack Support page](https://www.browserstack.com/support/app-automate) or [get in touch with us](https://www.browserstack.com/contact?ref=help).
+## 2. CI/CD Setup with Harness
 
+Integrate your Appium test suite into a Harness CI/CD pipeline to execute tests automatically on BrowserStack.
+
+### References
+
+* **Documentation:** [BrowserStack Harness Integration Guide](https://www.browserstack.com/docs/automate/selenium/harness?fw-lang=nodejs%2Fwebdriverio)
+* **Video Walkthrough:** [Harness Setup Video Reference](https://zoom.us/clips/share/qevoVuX7TyeyVCP7fQBzXA)
+
+---
+
+### Step 1: Configure Harness Secrets & Environment Variables
+
+Add your BrowserStack credentials and build metadata to your Harness Pipeline Environment Variables or Stage Variables using the following expression syntax:
+
+| Environment Variable Name | Harness Secret Expression / Value |
+| --- | --- |
+| `BROWSERSTACK_USERNAME` | `<+secrets.getValue("browserstack_username")>` |
+| `BROWSERSTACK_ACCESS_KEY` | `<+secrets.getValue("browserstack_access_key")>` |
+| `BUILD_NUMBER` | `<+pipeline.sequenceId>` |
+
+---
+
+### Step 2: Add Pipeline Run Step
+
+In your Harness pipeline stage, add a **Run** (or **Shell Script**) step to install dependencies and trigger test execution:
+
+```bash
+# Install dependencies and execute parallel WebdriverIO tests on App Automate
+cd android && npm install && npx wdio run-parallel-test/parallel.conf.js --mochaOpts.grep "always passing"
+
+```
